@@ -1,0 +1,1 @@
+const String App_Name = "Academy";

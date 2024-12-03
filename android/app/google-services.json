@@ -1,0 +1,126 @@
+{
+  "project_info": {
+    "project_number": "695192526641",
+    "project_id": "localstocks-bf5ed",
+    "storage_bucket": "localstocks-bf5ed.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695192526641:android:66a2d856086d6c1e179a10",
+        "android_client_info": {
+          "package_name": "com.example.learn_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695192526641-pr6kkkfadt6ceelu8m5fa8pnisot65bv.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.learn_flutter",
+            "certificate_hash": "53291ff5519a4906dbb1e74a2d5bbfbb556dcc39"
+          }
+        },
+        {
+          "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9paVlKkB4PmJKhKU0aLRRjW-OVqNnXsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "695192526641-icb05tilj9cke4im5b3vm8qskhgkduu2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.learnFlutter"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695192526641:android:4c6aa65ad9fd0413179a10",
+        "android_client_info": {
+          "package_name": "com.example.local_stocks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9paVlKkB4PmJKhKU0aLRRjW-OVqNnXsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "695192526641-icb05tilj9cke4im5b3vm8qskhgkduu2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.learnFlutter"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:695192526641:android:c525b3e3630b7e12179a10",
+        "android_client_info": {
+          "package_name": "com.suresh.academic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9paVlKkB4PmJKhKU0aLRRjW-OVqNnXsM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "695192526641-4p6121s6qho686vg8aplgcgonouvafph.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "695192526641-icb05tilj9cke4im5b3vm8qskhgkduu2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.learnFlutter"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

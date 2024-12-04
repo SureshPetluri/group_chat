@@ -1,14 +1,12 @@
-// Login StateNotifier provider
 import 'dart:convert';
-
 import 'package:academic/app/modules/home/home_state.dart';
+import 'package:academic/app/utils/form_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../utils/image_picker.dart';
+import '../../utils/repository.dart';
 import '../../widgets/snackbars_widget.dart';
 import '../dash_board/dash_board_notifier.dart';
 import '../group_chat/group_chat_state.dart';
@@ -40,17 +38,6 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
     // Update the selectAll flag based on whether all items are selected
     state = state.copyWith(selectAll: updatedItems.every((item) => item));
-  }
-
-  String getUserId() {
-    var user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      // If no user is logged in, return null
-      print("No user is currently signed in.");
-      return "";
-    }
-
-    return user.uid;
   }
 
   profileImageUpdate(
@@ -99,8 +86,9 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
   void onSelectAllChanged(bool? value) async {
     selectedUsers.clear();
+    print("SignInRepository... ${SignInRepository.getUserId()}");
     for (var user in state.users) {
-      bool presentUser = (getUserId() == user.userId);
+      bool presentUser = (SignInRepository.getUserId() == user.userId);
       if (value ?? false) {
         selectedUsers.add({
           "userId": user.userId,
@@ -127,112 +115,87 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
   Future<void> fetchUsers() async {
     try {
+      state = state.copyWith(isSubmitting:true);
+     // FormValidations.showProgress();
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('users') // 'users' collection in Firestore
           .get();
-
-      // Convert the snapshot to a list of users and update state
-
       List<AppCurrentUser> users = snapshot.docs.map((doc) {
         return AppCurrentUser.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();
       state = state.copyWith(users: users);
+      for (var user in users) {
+        if (SignInRepository.getUserId() == user.userId) {
+          selectedUsers.add({
+            "userId": user.userId,
+            "docId": user.docId,
+            "isGroupAdmin": true,
+            "profileName": user.name,
+            "profileImage": user.profileImageUrl,
+          });
+        }
+      }
+
       state = state.copyWith(
           selectedItems: List.generate(state.users.length, (index) => false));
     } catch (e) {
       print('Error fetching users: $e');
       // Optionally show an error message or handle empty state
+    }finally{
+      state = state.copyWith(isSubmitting:false);
+      // FormValidations.stopProgress();
     }
   }
+
 
   // Handle creating a group with selected users
   Future<void> createGroup(
       BuildContext context, WidgetRef ref, String groupId) async {
-    /*if (formKey.currentState?.validate() ?? false) {
-      if(state.imageBase64.isEmpty){
-        SnackNotification.showCustomSnackBar("Pick Image");
-        return;
-      }
-      state = state.copyWith(selectedUsers: selectedUsers);
-      if (state.selectedUsers.isEmpty) {
-        // If no users selected, show an alert
-        SnackNotification.showCustomSnackBar(
-            "Please select at least one user.");
-        return;
-      }
-
-      try {
-        String downloadUrl = await _uploadGroupImage(groupId);
-        print("selectedUsers in a group: ${state.selectedUsers}");
-        for (var selected in state.selectedUsers) {
-          final groupRef = await FirebaseFirestore.instance
-              .collection('users')
-              .doc(selected['userId'])
-              .collection('groups')
-              .add({
-            'groupName': groupNameController.text.trim(),
-            'groupImageUrl': downloadUrl,
-            'members': state.selectedUsers,
-          });
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(selected['userId'])
-              .collection('groups')
-              .doc(groupRef.id)
-              .update({
-            'groupId': groupRef.id, // Store the groupId in the same document
-          });
-        }
-        ref.read(groupImageUrlProvider.notifier).state = downloadUrl;
-        onDeselectAllChanged(false);
-        groupNameController.clear();
-        ref.read(dashBoardProvider.notifier).onItemSelected(1, ref);
-        */ /*Navigator.push(context,
-            MaterialPageRoute(builder: (context) => const GroupScreen()));*/ /*
-        SnackNotification.showCustomSnackBar(
-            "Group Created with Selected Users");
-        // print('Group created with ID: ${groupRef.id}');
-      } catch (e) {
-        SnackNotification.showCustomSnackBar("Error creating group: $e");
-        print("Error creating group: $e");
-      }
-    }*/
     if (state.imageBase64.isEmpty) {
       SnackNotification.showCustomSnackBar("Pick Image");
       return;
     }
+
     state = state.copyWith(selectedUsers: selectedUsers);
     if (state.selectedUsers.isEmpty) {
       // If no users selected, show an alert
       SnackNotification.showCustomSnackBar("Please select at least one user.");
       return;
     }
-    String downloadUrl = await _uploadGroupImage(groupId);
-    print("selectedUsers in a group: ${state.selectedUsers}");
-    // Create a new group document in the central 'groups' collection
-    final groupRef = await FirebaseFirestore.instance.collection('groups').add({
-      'groupName': groupNameController.text.trim(),
-      'groupImageUrl': downloadUrl,
-      'members': state.selectedUsers,
-    });
-    await FirebaseFirestore.instance
-        .collection('groups')
-        .doc(groupRef.id)
-        .update({
-      'groupId': groupRef.id,
-    });
-    // Add the groupId to each user's `groups` collection
-    for (var selected in selectedUsers) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(selected['userId'])
-          .collection('groups')
-          .add({
-        // Use the same groupId for all users
+    try{
+      state = state.copyWith(isGroupCreate:true);
+      String downloadUrl = await _uploadGroupImage(groupId);
+      print("selectedUsers in a group: ${state.selectedUsers}");
+      // Create a new group document in the central 'groups' collection
+      final groupRef = await FirebaseFirestore.instance.collection('groups').add({
+        'groupName': groupNameController.text.trim(),
+        'groupImageUrl': downloadUrl,
+        'members': state.selectedUsers,
       });
+      await FirebaseFirestore.instance
+          .collection('groups')
+          .doc(groupRef.id)
+          .update({
+        'groupId': groupRef.id,
+      });
+      // Add the groupId to each user's `groups` collection
+      for (var selected in selectedUsers) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(selected['userId'])
+            .collection('groups')
+            .add({
+          'groupId': groupRef.id, // Use the same groupId for all users
+        });
+      }
+      ref.read(groupImageUrlProvider.notifier).state = downloadUrl;
+      onDeselectAllChanged(false);
+    }catch(e){
+      print("Error..$e");
+    }finally{
+      state = state.copyWith(isGroupCreate:false);
     }
-    ref.read(groupImageUrlProvider.notifier).state = downloadUrl;
-    onDeselectAllChanged(false);
+
     groupNameController.clear();
     ref.read(dashBoardProvider.notifier).onItemSelected(1, ref);
   }

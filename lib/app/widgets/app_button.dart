@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 class AppButton extends StatefulWidget {
   const AppButton(
-      {super.key, this.title = "",
+      {super.key,
+      this.title = "",
       this.child,
       this.titleColor = Colors.white,
       this.btnBackgroundColor = Colors.white,
@@ -81,12 +82,14 @@ class _AppButtonState extends State<AppButton> with TickerProviderStateMixin {
                 gradient: LinearGradient(
                   begin: Alignment.topRight,
                   end: Alignment.bottomLeft,
-                  colors: [
-                    widget.btnBackgroundColor,
-                    widget.btnBackgroundColor,
-                    widget.btnBackgroundColor,
-                    // Color(0xFF1B54B7)
-                  ],
+                  colors: widget.disableBtn
+                      ? [Colors.grey]
+                      : [
+                          widget.btnBackgroundColor,
+                          widget.btnBackgroundColor,
+                          widget.btnBackgroundColor,
+                          // Color(0xFF1B54B7)
+                        ],
                 ),
               ),
         child: ElevatedButton(

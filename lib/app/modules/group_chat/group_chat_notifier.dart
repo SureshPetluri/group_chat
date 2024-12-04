@@ -1,55 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../utils/form_utils.dart';
+import '../../utils/repository.dart';
 import 'group_chat_state.dart';
 
 class GroupChatNotifier extends StateNotifier<GroupChatState> {
-  GroupChatNotifier() : super(GroupChatState()) {
-    // fetchGroups();
-  }
-  String getUserId() {
-    var user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      // If no user is logged in, return null
-      print("No user is currently signed in.");
-      return "";
-    }
+  GroupChatNotifier() : super(GroupChatState());
 
-    return user.uid;
-  }
-
-  /*Future<void> fetchGroups() async {
-    try {
-      var user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        // If no user is logged in, return null
-        print("No user is currently signed in.");
-        return null;
-      }
-
-      String userId = user.uid;
-      QuerySnapshot snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('groups') // 'users' collection in Firestore
-          .get();
-
-      // Convert the snapshot to a list of users and update state
-      print("snapshot,....${userId}");
-      List<GroupModel> users = snapshot.docs.map((doc) {
-        return GroupModel.fromFirestore(doc.data() as Map<String, dynamic>);
-      }).toList();
-      state = state.copyWith(groupMembers: users);
-    } catch (e) {
-      print('Error fetching users: $e');
-      // Optionally show an error message or handle empty state
-    }
-  }*/
   Future<void> fetchGroups() async {
     try {
       List<GroupModel> groups = [];
-      String userId = getUserId();
+      String userId = SignInRepository.getUserId();
+      // FormValidations.showProgress();
+      state = state.copyWith(isSubmitting:true);
       // Fetching all group references for the user from their 'groups' collection
       QuerySnapshot groupsSnapshot = await FirebaseFirestore.instance
           .collection('users')
@@ -77,8 +41,11 @@ class GroupChatNotifier extends StateNotifier<GroupChatState> {
       state = state.copyWith(groupMembers: groups);
       // Return the list of all groups with member details
     } catch (e) {
-      print('Error fetching user groups: $e');
+      debugPrint('Error fetching user groups: $e');
        // In case of error, return an empty list
+    }finally{
+      state = state.copyWith(isSubmitting:false);
+      // FormValidations.stopProgress();
     }
   }
 }

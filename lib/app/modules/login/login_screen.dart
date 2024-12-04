@@ -9,33 +9,14 @@ import '../../utils/showModelBottomSheet.dart';
 import '../../utils/theme/color_theme.dart';
 import '../../widgets/app_button.dart';
 import '../forgot/forgot_screen.dart';
-import '../group_chat/group_chat_state.dart';
 import '../registration/registration_screen.dart';
 import 'login_notifier.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
+class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends ConsumerState<LoginPage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    ref.watch(groupNameProvider.notifier).state = "";
-    ref.watch(groupIdProvider.notifier).state = "";
-    ref.watch(groupImageUrlProvider.notifier).state = "";
-    super.didChangeDependencies();
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // Get the current state from the provider
     final loginState = ref.watch(loginStateProvider);
     final loginStateNotifier = ref.read(loginStateProvider.notifier);
@@ -123,30 +104,43 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       'Email: ${loginState.email}, Password: ${loginState.password}');
                 },
                 titleFontSize: 16,
-                title: "Sign In",
                 titleColor: Colors.black,
+                child: loginState.isSubmitting
+                    ? const CircularProgressIndicator()
+                    : const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 28.0),
+                        child: Text(
+                          "Sign In",
+                          style: TextStyle(color: blackColor, fontSize: 18),
+                        ),
+                      ),
               ),
 
               const SizedBox(height: 16),
               // Forgot Password Button
-              Text.rich(
-                TextSpan(
-                  text: 'New to $App_Name? ',
-                  style: TextStyle(color: Colors.black),
-                  children: [
-                    TextSpan(
-                        text: 'Register',
-                        style: const TextStyle(color: whiteColor),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => RegistrationPage()));
-                          }),
-                  ],
-                ),
-              ),
+              loginState.isSubmitting
+                  ? const SizedBox.shrink()
+                  : Text.rich(
+                      TextSpan(
+                        text: 'New to $App_Name? ',
+                        style: TextStyle(color: Colors.black),
+                        children: [
+                          TextSpan(
+                              text: 'Register',
+                              style: const TextStyle(color: whiteColor),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = loginState.isSubmitting
+                                    ? () {}
+                                    : () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    RegistrationPage()));
+                                      }),
+                        ],
+                      ),
+                    ),
             ],
           ),
         ),

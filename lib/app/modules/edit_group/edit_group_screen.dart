@@ -39,8 +39,6 @@ class EditGroupScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final editGroup = ref.watch(editGroupProvider);
     final editGroupNotifier = ref.read(editGroupProvider.notifier);
-    /* final args = ModalRoute.of(context)?.settings.arguments as Map?;
-    final String groupId = args?["groupId"] ?? "";*/
     return Scaffold(
       backgroundColor: background,
       appBar: AppBar(
@@ -105,6 +103,7 @@ class EditGroupScreen extends ConsumerWidget {
                 itemCount: groupData.members.length,
                 itemBuilder: (context, index) {
                   var member = groupData.members[index];
+                  print("profileNamecc...${groupData.members[index].profileName}..$index");
                   return Padding(
                     padding: const EdgeInsets.only(right: 8.0, bottom: 8.0),
                     child: ListTile(
@@ -122,7 +121,7 @@ class EditGroupScreen extends ConsumerWidget {
                                 height: 50,
                               ),
                             ),
-                      title: Text(member.profileName),
+                      title: Text(member.profileName,style: const TextStyle(color: Colors.black,fontSize: 16),),
                       trailing: member.isGroupAdmin
                           ? const Text("Group Admin")
                           : const Text(""),

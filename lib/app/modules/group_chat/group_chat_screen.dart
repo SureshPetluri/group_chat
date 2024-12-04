@@ -105,7 +105,9 @@ class GroupScreen extends ConsumerWidget {
                           var result = await Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>  ChatScreen(groupData: groupData,),
+                                builder: (context) => ChatScreen(
+                                  groupData: groupData,
+                                ),
                               ));
                           if (result == 'update') {
                             groupNotifier.fetchGroups();
@@ -117,11 +119,16 @@ class GroupScreen extends ConsumerWidget {
                     );
                   });
             })
-          : const Center(
-              child: Text(
-              "You don't Create Community chat to connect",
-              style: TextStyle(color: blackColor, fontSize: 16),
-            )),
+          : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(
+                child: Text(
+                group.isSubmitting
+                    ? "Loading..."
+                    : "You don't Create Community chat to connect",
+                style: const TextStyle(color: blackColor, fontSize: 16),
+              )),
+          ),
     );
   }
 }

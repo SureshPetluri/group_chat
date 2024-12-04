@@ -126,20 +126,17 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
         await user.sendEmailVerification();
         String downloadUrl = await _uploadImage(user.uid);
         if (state.isRegCompleted) {
-          final docRefId =  await _firestore.collection('users').add({
+          final docRefId =  await _firestore.collection('users').doc(user.uid).set({
             'name': state.fullName,
             'mobile': state.mobile,
             'email': state.email,
             'userId': user.uid,
             'isVerified': false,
+            'isAdmin': false,
             'createdAt': Timestamp.now(),
             'profileImageUrl': downloadUrl,
           });
-          await FirebaseFirestore.instance
-              .collection('users').doc(docRefId.id)
-              .update({
-            'docId': docRefId.id, // Store the groupId in the same document
-          });
+
         }
 
 

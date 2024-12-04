@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/image_picker.dart';
+import '../../utils/repository.dart';
 import '../../widgets/snackbars_widget.dart';
 import 'edit_group_state.dart';
 
@@ -29,19 +30,10 @@ class EditGroupNotifier extends StateNotifier<EditGroupState> {
 
   Future<void> fetchGroups(WidgetRef ref) async {
     try {
-      var user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        // If no user is logged in, return null
-        print("No user is currently signed in.");
-        return;
-      }
-
-      String userId = user.uid;
-
       // Fetch the group document using the groupId from the provider
       DocumentSnapshot snapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(userId)
+          .doc(SignInRepository.getUserId())
           .collection('groups')
           .doc(ref.watch(groupIdProvider.notifier).state)  // Fetch groupId from provider
           .get();

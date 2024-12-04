@@ -118,34 +118,37 @@ class RegistrationPage extends ConsumerWidget {
                   child: formState.isSubmitting
                       ? const CircularProgressIndicator()
                       : const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 28.0),
-                        child: Text(
+                          padding: EdgeInsets.symmetric(horizontal: 28.0),
+                          child: Text(
                             "Register",
-                            style: TextStyle(color: blackColor,fontSize: 18),
+                            style: TextStyle(color: blackColor, fontSize: 18),
                           ),
-                      ),
+                        ),
                 ),
 
                 const SizedBox(height: 16),
                 // Forgot Password Button
-                Text.rich(
-                  TextSpan(
-                    text: 'Already have an account ',
-                    style: TextStyle(color: Colors.black),
-                    children: [
-                      TextSpan(
-                          text: 'Sign In',
-                          style: const TextStyle(color: whiteColor),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => const LoginPage()));
-                            }),
-                    ],
-                  ),
-                ),
+                formState.isSubmitting
+                    ? const SizedBox.shrink()
+                    : Text.rich(
+                        TextSpan(
+                          text: 'Already have an account ',
+                          style: TextStyle(color: Colors.black),
+                          children: [
+                            TextSpan(
+                                text: 'Sign In',
+                                style: const TextStyle(color: whiteColor),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                const LoginPage()));
+                                  }),
+                          ],
+                        ),
+                      ),
               ],
             ),
           ),

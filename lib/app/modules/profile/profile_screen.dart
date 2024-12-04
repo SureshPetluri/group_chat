@@ -127,7 +127,7 @@ class ProfileScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Form(
-                        // key: _formKey,
+                        key: profile.formKey,
                         child: Column(children: [
                           TextFormField(
                             controller: profile.streetController,
@@ -195,6 +195,7 @@ class ProfileScreen extends ConsumerWidget {
                                 titleColor: Colors.black,
                               ),
                               AppButton(
+                                disableBtn: profileData.state.isNotEmpty,
                                 height: 30,
                                 borderRadius: 5,
                                 onPressed: () async {

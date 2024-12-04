@@ -3,16 +3,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../utils/repository.dart';
 import '../../utils/theme/color_theme.dart';
 import '../../widgets/network_image.dart';
 import '../group_chat/group_chat_state.dart';
 import 'chat_notifier.dart';
 
 class ChatScreen extends ConsumerWidget {
-  const ChatScreen({
-    super.key,required this.groupData
-  });
- final  GroupModel groupData;
+  const ChatScreen({super.key, required this.groupData});
+
+  final GroupModel groupData;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     /*final args = ModalRoute.of(context)?.settings.arguments as Map?;
@@ -47,7 +48,7 @@ class ChatScreen extends ConsumerWidget {
                 var result = await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>  EditGroupScreen(groupData:groupData),
+                    builder: (context) => EditGroupScreen(groupData: groupData),
                   ),
                 );
                 if (result == "update") {
@@ -139,11 +140,10 @@ class ChatScreen extends ConsumerWidget {
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Column(
-                        crossAxisAlignment:
-                            (messages[index]['senderId'] ?? "") ==
-                                    groupChatN.userUid
-                                ? CrossAxisAlignment.start
-                                : CrossAxisAlignment.end,
+                        crossAxisAlignment: SignInRepository.getUserId() ==
+                                (messages[index]['senderId'] ?? "")
+                            ? CrossAxisAlignment.start
+                            : CrossAxisAlignment.end,
                         children: [
                           Container(
                               padding: EdgeInsets.all(8.0),
@@ -153,13 +153,17 @@ class ChatScreen extends ConsumerWidget {
                                       topRight: const Radius.circular(10.0),
                                       topLeft: const Radius.circular(10.0),
                                       bottomLeft: Radius.circular(
-                                          (messages[index]['senderId'] ?? "") ==
-                                                  groupChatN.userUid
+                                          SignInRepository.getUserId() ==
+                                                  (messages[index]
+                                                          ['senderId'] ??
+                                                      "")
                                               ? 0.0
                                               : 10.0),
                                       bottomRight: Radius.circular(
-                                          (messages[index]['senderId'] ?? "") !=
-                                                  groupChatN.userUid
+                                          SignInRepository.getUserId() !=
+                                                  (messages[index]
+                                                          ['senderId'] ??
+                                                      "")
                                               ? 0.0
                                               : 10.0)),
                                   border: Border.all()),
@@ -170,8 +174,8 @@ class ChatScreen extends ConsumerWidget {
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              if ((messages[index]['senderId'] ?? "") !=
-                                  groupChatN.userUid) ...[
+                              if (SignInRepository.getUserId() !=
+                                  (messages[index]['senderId'] ?? "")) ...[
                                 Text(messages[index]['userName'] ?? ""),
                                 const SizedBox(
                                   width: 2.0,
@@ -194,8 +198,8 @@ class ChatScreen extends ConsumerWidget {
                                         height: 20,
                                       ),
                                     ),
-                              if ((messages[index]['senderId'] ?? "") ==
-                                  groupChatN.userUid) ...[
+                              if (SignInRepository.getUserId() ==
+                                  (messages[index]['senderId'] ?? "")) ...[
                                 Text(messages[index]['userName'] ?? ""),
                                 const SizedBox(
                                   width: 2.0,

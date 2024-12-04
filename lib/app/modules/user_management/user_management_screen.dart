@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:academic/app/modules/profile/profile_notifier.dart';
-import 'package:academic/app/utils/form_utils.dart';
 import 'package:academic/app/widgets/app_button.dart';
 import 'package:academic/app/widgets/network_image.dart';
 import 'package:flutter/material.dart';
@@ -9,17 +6,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../utils/repository.dart';
 import '../../utils/theme/color_theme.dart';
-import '../group_chat/group_chat_state.dart';
 import '../profile/profile_screen.dart';
-import 'home_notifier.dart';
+import 'user_management_notifier.dart';
 
-class HomeScreen extends ConsumerWidget {
-  const HomeScreen({super.key});
+class UserManagementScreen extends ConsumerWidget {
+  const UserManagementScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final homeState = ref.watch(homeStateProvider);
-    final homeNotifier = ref.watch(homeStateProvider.notifier);
+    final homeState = ref.watch(userManagementProvider);
+    final homeNotifier = ref.watch(userManagementProvider.notifier);
     final profileImage = ref.read(profileProvider);
     return Scaffold(
       backgroundColor: background,
@@ -113,13 +109,6 @@ class HomeScreen extends ConsumerWidget {
                                                   true, index);
                                               homeNotifier.selectedUsers.add({
                                                 "userId": user.userId,
-                                                "docId": user.docId,
-                                                "profileName": user.name,
-                                                "isGroupAdmin": SignInRepository
-                                                        .getUserId() ==
-                                                    user.userId,
-                                                "profileImage":
-                                                    user.profileImageUrl
                                               });
                                               print(
                                                   "selectedUsers.....${homeNotifier.selectedUsers}");
@@ -160,10 +149,8 @@ class HomeScreen extends ConsumerWidget {
                                                 onTap: () {
                                                   homeNotifier.onItemSelected(
                                                       false, index);
-                                                  homeNotifier.selectedUsers
-                                                      .removeAt(index);
                                                   print(
-                                                      "selectedUsers.....${homeNotifier.selectedUsers}");
+                                                      "selectedUsers.ghghghg....${homeNotifier.selectedUsers}");
                                                 },
                                                 child: const Icon(
                                                     Icons.check_circle),
@@ -176,6 +163,9 @@ class HomeScreen extends ConsumerWidget {
                                               user.userId
                                           ? const Text("Self")
                                           : Text(user.name),
+                                      trailing: user.isVerified
+                                          ? Icon(Icons.check_circle)
+                                          : null,
                                       // onTap: () {
                                       //   Navigator.push(
                                       //       context,
@@ -232,87 +222,34 @@ class HomeScreen extends ConsumerWidget {
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: (homeState.selectedItems.any((item) => item))
-          ? Form(
-              key: homeNotifier.formKey,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GestureDetector(
-                      onTap: ref
-                              .watch(groupImageUrlProvider.notifier)
-                              .state
-                              .isEmpty
-                          ? () {
-                              homeNotifier.profileImageUpdate(
-                                  context,
-                                  ref.watch(groupIdProvider.notifier).state,
-                                  ref);
-                            }
-                          : null,
-                      child: Card(
-                        shape: const CircleBorder(),
-                        clipBehavior: Clip.antiAlias,
-                        child: (ref
-                                    .watch(groupImageUrlProvider.notifier)
-                                    .state
-                                    .isEmpty &&
-                                homeState.imageBase64.isEmpty)
-                            ? const CircleAvatar(
-                                radius: 50,
-                                backgroundColor: Colors.grey,
-                                child: Icon(Icons.camera_alt))
-                            : ref
-                                    .watch(groupImageUrlProvider.notifier)
-                                    .state
-                                    .isEmpty
-                                ? Image.memory(
-                                    base64Decode(homeState.imageBase64),
-                                    height: 100,
-                                    width: 100,
-                                  )
-                                : networkImage(
-                                    imageUrl: ref
-                                        .watch(groupImageUrlProvider.notifier)
-                                        .state,
-                                    height: 100,
-                                    width: 100,
-                                  ),
-                      ),
-                    ),
-                    TextFormField(
-                      decoration:
-                          const InputDecoration(labelText: "Group Name"),
-                      controller: homeNotifier.groupNameController,
-                      validator: (text) => FormValidations.notEmpty(text,
-                          fieldName: "Group Name"),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    AppButton(
-                      onPressed: () async {
-                        await homeNotifier.createGroup(
-                          context,
-                          ref,
-                          ref.watch(groupIdProvider.notifier).state,
-                        );
-                      },
-                      titleColor: Colors.black,
-                      child: homeState.isGroupCreate
-                          ? const CircularProgressIndicator()
-                          : const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 18.0),
-                              child: Text(
-                                "Create Group",
-                                style:
-                                    TextStyle(color: blackColor, fontSize: 18),
-                              ),
+          ? Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  AppButton(
+                    onPressed: () async {
+                      homeNotifier.onDeselectAllChanged(false);
+                    },
+                    title: "Reject",
+                    titleColor: Colors.black,
+                  ),
+                  AppButton(
+                    onPressed: () async {
+                      homeNotifier.createGroup(context);
+                    },
+                    titleColor: Colors.black,
+                    child: homeState.isGroupCreate
+                        ? const CircularProgressIndicator()
+                        : const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 18.0),
+                            child: Text(
+                              "Approve",
+                              style: TextStyle(color: blackColor, fontSize: 18),
                             ),
-                    ),
-                  ],
-                ),
+                          ),
+                  ),
+                ],
               ),
             )
           : null,

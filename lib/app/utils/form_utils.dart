@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+
+import '../../main.dart';
+import '../widgets/app_progress_bar.dart';
+
 class FormValidations {
   static String? notEmpty(String? value, {String? fieldName}) {
     if (value == null || value.isEmpty) {
@@ -8,6 +13,7 @@ class FormValidations {
     }
     return null; // Valid password
   }
+
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password is required';
@@ -19,8 +25,8 @@ class FormValidations {
     return null; // Valid password
   }
 
-  static String? validateConfirmPassword(String? password,
-      String? confirmPassword) {
+  static String? validateConfirmPassword(
+      String? password, String? confirmPassword) {
     if (confirmPassword == null || confirmPassword.isEmpty) {
       return 'Confirm password is required';
     } else if (confirmPassword != password) {
@@ -59,5 +65,18 @@ class FormValidations {
     }
 
     return null; // Valid email
+  }
+
+  static showProgress() {
+    showDialog(
+        context: navigatorKey.currentState!.context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return const AlertDialog(content: AppProgressDialog());
+        });
+  }
+
+  static stopProgress() {
+    Navigator.pop(navigatorKey.currentState!.context);
   }
 }

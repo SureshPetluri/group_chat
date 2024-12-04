@@ -5,18 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../utils/repository.dart';
 import '../profile/profile_notifier.dart';
 
 class ChatNotifier extends StateNotifier<ChatState> {
-  ChatNotifier() : super(ChatState()) {
-    _user = _auth.currentUser!;
-    state = state.copyWith(userUid: _user?.uid);
-  }
+  ChatNotifier() : super(ChatState());
 
   TextEditingController sentMsgController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  User? _user;
+
 
   // Method to send a message
   Future<void> _sendMessage(BuildContext context, WidgetRef ref) async {
@@ -52,7 +49,7 @@ class ChatNotifier extends StateNotifier<ChatState> {
         .state)
         .collection('messages')
         .add({
-      'senderId': state.userUid,
+      'senderId': SignInRepository.getUserId(),
       'message': sentMsgController.text.trim(),
       'timestamp': FieldValue.serverTimestamp(),
       'userName': ProviderScope.containerOf(context, listen: false)

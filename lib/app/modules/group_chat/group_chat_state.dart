@@ -2,16 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class GroupChatState {
   final List<GroupModel> groupMembers;
+  final bool isSubmitting;
 
   GroupChatState({
     this.groupMembers = const [],
+    this.isSubmitting = false,
   });
 
   GroupChatState copyWith({
     List<GroupModel>? groupMembers,
+    bool? isSubmitting,
   }) {
     return GroupChatState(
       groupMembers: groupMembers ?? this.groupMembers,
+      isSubmitting: isSubmitting ?? this.isSubmitting,
     );
   }
 }

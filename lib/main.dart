@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:academic/app/modules/login/login_screen.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'app/utils/theme/color_theme.dart';
 
@@ -10,14 +13,19 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // await GetStorage.init();
+  await GetStorage.init("SIGN_IN_REPOSITORY");
   await Firebase.initializeApp(
-    options: const FirebaseOptions(
-        apiKey: "AIzaSyB9paVlKkB4PmJKhKU0aLRRjW-OVqNnXsM",
-        appId: "1:695192526641:android:c525b3e3630b7e12179a10",
-        messagingSenderId: "695192526641",
-        projectId: "localstocks-bf5ed",
-        storageBucket: "localstocks-bf5ed.appspot.com"),
+    options: Platform.isAndroid
+        ? const FirebaseOptions(
+            apiKey: "AIzaSyB9paVlKkB4PmJKhKU0aLRRjW-OVqNnXsM",
+            appId: "1:695192526641:android:c525b3e3630b7e12179a10",
+            messagingSenderId: "695192526641",
+            projectId: "localstocks-bf5ed",
+            storageBucket: "localstocks-bf5ed.appspot.com")
+        : null,
   );
+
   FirebaseAppCheck.instance.activate();
   runApp(const ProviderScope(child: MyApp()));
 }

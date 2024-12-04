@@ -1,8 +1,9 @@
 import 'package:academic/app/utils/firebase_methods.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../utils/repository.dart';
 import '../../widgets/snackbars_widget.dart';
 import '../login/login_screen.dart';
 import 'profile_state.dart';
@@ -10,10 +11,11 @@ import 'profile_state.dart';
 class ProfileNotifier extends StateNotifier<ProfileState> {
   ProfileNotifier() : super(ProfileState()) {
     // if (state.name.isEmpty && state.email.isEmpty) {
-      fetchAndDisplayUserDetails();
+    fetchAndDisplayUserDetails();
     // }
   }
 
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController streetController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController stateController = TextEditingController();
@@ -29,25 +31,16 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
   Future<Map<String, dynamic>?> getUserDetails() async {
     try {
       // Get the current user's UID, check if the user is logged in
-      var user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        // If no user is logged in, return null
-        print("No user is currently signed in.");
-        return null;
-      }
-
-      String userId = user.uid;
-
+      String userId = SignInRepository.getUserId();
       // Fetch user data from Firestore based on userId
       var userDocument = await FirebaseFirestore.instance
           .collection('users')
-          .where('userId', isEqualTo: userId)
-          .limit(1) // Limit to one document
+          .doc(userId) // Limit to one document
           .get();
-      state = state.copyWith(docId: userDocument.docs.first.id);
+      state = state.copyWith(docId: userDocument.id);
       print("Error fetching user details: $userDocument");
       // Return the first document's data if it exists, otherwise null
-      return userDocument.docs.isNotEmpty ? userDocument.docs.first.data() : {};
+      return (userDocument.data() ?? {});
     } catch (e) {
       print("Error fetching user details: $e");
       return {};
@@ -56,21 +49,23 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   updateAddress(BuildContext context) async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
-    if (state.docId.isNotEmpty) {
-      await firestore.collection('users').doc(state.docId).update({
-        'updatedAt': Timestamp.now(),
-        'address': {
-          'street': streetController.text.trim(),
-          'city': stateController.text.trim(),
-          'state': stateController.text.trim(),
-          'postalCode': postalCodeController.text.trim(),
-        },
-      });
-      fetchAndDisplayUserDetails();
-      SnackNotification.showCustomSnackBar('Address Added');
-      expansionAddressController.collapse();
-    } else {
-      SnackNotification.showCustomSnackBar('Please try again after some Time');
+    if (formKey.currentState?.validate() ?? false) {
+      if (state.docId.isNotEmpty) {
+        await firestore.collection('users').doc(state.docId).update({
+          'updatedAt': Timestamp.now(),
+          'address': {
+            'street': streetController.text.trim(),
+            'city': stateController.text.trim(),
+            'state': stateController.text.trim(),
+            'postalCode': postalCodeController.text.trim(),
+          },
+        });
+        fetchAndDisplayUserDetails();
+        SnackNotification.showCustomSnackBar('Address Added');
+        expansionAddressController.collapse();
+      } else {
+        SnackNotification.showCustomSnackBar('Please fill all fields');
+      }
     }
   }
 
@@ -113,14 +108,14 @@ class ProfileNotifier extends StateNotifier<ProfileState> {
 
   logOut(BuildContext context) {
     FirebaseMethods.logOut(context);
-    // ProviderScope.containerOf(context).dispose();
+    SignInRepository.eraseSignInData();
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const LoginPage()),
       (Route<dynamic> route) => false, // Remove all routes
     );
     expansionLogoutController.collapse();
-    SnackNotification.showCustomSnackBar("Signed out");
+    SnackNotification.showCustomSnackBar("Successfully Logout");
   }
 }
 

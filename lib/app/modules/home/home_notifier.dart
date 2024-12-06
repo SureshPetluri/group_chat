@@ -1,10 +1,11 @@
 import 'dart:convert';
+
 import 'package:academic/app/modules/home/home_state.dart';
-import 'package:academic/app/utils/form_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../utils/image_picker.dart';
 import '../../utils/repository.dart';
 import '../../widgets/snackbars_widget.dart';
@@ -115,8 +116,8 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
 
   Future<void> fetchUsers() async {
     try {
-      state = state.copyWith(isSubmitting:true);
-     // FormValidations.showProgress();
+      state = state.copyWith(isSubmitting: true);
+      // FormValidations.showProgress();
       QuerySnapshot snapshot = await FirebaseFirestore.instance
           .collection('users') // 'users' collection in Firestore
           .get();
@@ -124,33 +125,36 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
         return AppCurrentUser.fromFirestore(doc.data() as Map<String, dynamic>);
       }).toList();
       state = state.copyWith(users: users);
-      for (var user in users) {
-        if (SignInRepository.getUserId() == user.userId) {
-          selectedUsers.add({
-            "userId": user.userId,
-            "docId": user.docId,
-            "isGroupAdmin": true,
-            "profileName": user.name,
-            "profileImage": user.profileImageUrl,
-          });
-        }
-      }
 
       state = state.copyWith(
           selectedItems: List.generate(state.users.length, (index) => false));
     } catch (e) {
       print('Error fetching users: $e');
       // Optionally show an error message or handle empty state
-    }finally{
-      state = state.copyWith(isSubmitting:false);
+    } finally {
+      state = state.copyWith(isSubmitting: false);
       // FormValidations.stopProgress();
     }
   }
 
+  currentUser(int index) {
+    state = state.copyWith(currentUserIndex: index);
+  }
 
   // Handle creating a group with selected users
   Future<void> createGroup(
       BuildContext context, WidgetRef ref, String groupId) async {
+    if (SignInRepository.getUserId() ==
+        state.users[state.currentUserIndex].userId) {
+      selectedUsers.add({
+        "userId": state.users[state.currentUserIndex].userId,
+        'docId': state.users[state.currentUserIndex].docId,
+        "isGroupAdmin": true,
+        "profileName": state.users[state.currentUserIndex].name,
+        "profileImage": state.users[state.currentUserIndex].profileImageUrl,
+      });
+    }
+
     if (state.imageBase64.isEmpty) {
       SnackNotification.showCustomSnackBar("Pick Image");
       return;
@@ -162,12 +166,13 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
       SnackNotification.showCustomSnackBar("Please select at least one user.");
       return;
     }
-    try{
-      state = state.copyWith(isGroupCreate:true);
+    try {
+      state = state.copyWith(isGroupCreate: true);
       String downloadUrl = await _uploadGroupImage(groupId);
       print("selectedUsers in a group: ${state.selectedUsers}");
       // Create a new group document in the central 'groups' collection
-      final groupRef = await FirebaseFirestore.instance.collection('groups').add({
+      final groupRef =
+          await FirebaseFirestore.instance.collection('groups').add({
         'groupName': groupNameController.text.trim(),
         'groupImageUrl': downloadUrl,
         'members': state.selectedUsers,
@@ -190,10 +195,10 @@ class HomeStateNotifier extends StateNotifier<HomeState> {
       }
       ref.read(groupImageUrlProvider.notifier).state = downloadUrl;
       onDeselectAllChanged(false);
-    }catch(e){
+    } catch (e) {
       print("Error..$e");
-    }finally{
-      state = state.copyWith(isGroupCreate:false);
+    } finally {
+      state = state.copyWith(isGroupCreate: false);
     }
 
     groupNameController.clear();

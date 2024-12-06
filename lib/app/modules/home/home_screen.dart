@@ -92,8 +92,13 @@ class HomeScreen extends ConsumerWidget {
                           shrinkWrap: true,
                           itemBuilder: (BuildContext context, int index) {
                             var user = homeState.users[index];
-
-                            return SignInRepository.getUserId() != user.userId
+                            if ((SignInRepository.getUserId() == user.userId) &&
+                                (homeState.currentUserIndex == -1)) {
+                              homeNotifier.currentUser(index);
+                            }
+                            return ((SignInRepository.getUserId() !=
+                                        user.userId) &&
+                                    (user.isVerified == true))
                                 ? Padding(
                                     padding: const EdgeInsets.all(4.0),
                                     child: ListTile(

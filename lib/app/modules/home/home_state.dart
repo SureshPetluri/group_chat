@@ -1,6 +1,7 @@
 class HomeState {
   List<bool> selectedItems;
   final bool selectAll;
+  final int currentUserIndex;
   final bool isGroupPage;
   List<AppCurrentUser> users = [];
   List<Map<String, dynamic>> selectedUsers = [];
@@ -17,6 +18,7 @@ class HomeState {
     this.selectedUsers = const [],
     this.imageBase64 = '',
     this.imageName = '',
+    this.currentUserIndex = -1,
     this.isSubmitting = false,
     this.isGroupCreate = false,
   });
@@ -29,6 +31,7 @@ class HomeState {
     bool? isGroupPage,
     String? imageBase64,
     String? imageName,
+    int? currentUserIndex,
     List<AppCurrentUser>? users,
     List<Map<String, dynamic>>? selectedUsers,
   }) {
@@ -38,6 +41,7 @@ class HomeState {
       isGroupPage: isGroupPage ?? this.isGroupPage,
       users: users ?? this.users,
       imageBase64: imageBase64 ?? this.imageBase64,
+      currentUserIndex: currentUserIndex ?? this.currentUserIndex,
       imageName: imageName ?? this.imageName,
       selectedUsers: selectedUsers ?? this.selectedUsers,
       isSubmitting: isSubmitting ?? this.isSubmitting,
@@ -51,6 +55,7 @@ class AppCurrentUser {
   final String name;
   final String email;
   final String userId;
+  final bool isVerified;
   final String docId;
   final String profileImageUrl;
 
@@ -59,6 +64,7 @@ class AppCurrentUser {
       this.name = "",
       this.email = "",
       this.userId = "",
+      this.isVerified = false,
       this.docId = "",
       this.profileImageUrl = ""});
 
@@ -70,6 +76,7 @@ class AppCurrentUser {
       email: firestore.containsKey('email') ? firestore['email'] ?? "" : "",
       docId: firestore.containsKey('docId') ? firestore['docId'] ?? "" : "",
       userId: firestore.containsKey('userId') ? firestore['userId'] ?? "" : "",
+      isVerified: firestore.containsKey('isVerified') ? firestore['isVerified'] ?? false : false,
       profileImageUrl: firestore.containsKey('profileImageUrl')
           ? firestore['profileImageUrl'] ?? ""
           : "",

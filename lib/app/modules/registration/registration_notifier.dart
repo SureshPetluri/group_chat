@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:academic/app/modules/login/login_screen.dart';
 import 'package:academic/app/modules/registration/registration_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,19 +12,16 @@ import '../../utils/image_picker.dart';
 import '../../widgets/snackbars_widget.dart';
 
 class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
-  RegistrationFormNotifier()
-      : super(RegistrationFormState(
-          fullName: '',
-          mobile: '',
-          email: '',
-          password: '',
-          confirmPassword: '',
-        ));
-
+  RegistrationFormNotifier() : super(RegistrationFormState());
+  TextEditingController fullNameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController mobileController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   GlobalKey<FormState> formKeyOTP = GlobalKey<FormState>();
 
-  void updateFullName(String value) {
+  /*void updateFullName(String value) {
     state = state.copyWith(fullName: value);
   }
 
@@ -41,24 +39,24 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
 
   void updateConfirmPassword(String value) {
     state = state.copyWith(confirmPassword: value);
-  }
+  }*/
 
   Future<void> submitForm(BuildContext context) async {
     // Dummy validation and submission process
     if (formKey.currentState?.validate() ?? false) {
-      if (_validateForm()) {
-        await registerUser(context);
-        // await sendVerificationCode(state.mobile, context);
-        // buildShowModalBottomSheet(context, const VerifyOTP());
+      // if (_validateForm()) {
+      await registerUser(context);
+      // await sendVerificationCode(state.mobile, context);
+      // buildShowModalBottomSheet(context, const VerifyOTP());
 
-        // Open the Modal Bottom Sheet on success
-      } else {
-        // state = state.copyWith(errorMessage: 'Please correct the errors');
-      }
+      // Open the Modal Bottom Sheet on success
+    } else {
+      // state = state.copyWith(errorMessage: 'Please correct the errors');
+      // }
     }
   }
 
-  bool _validateForm() {
+  /*bool _validateForm() {
     // Basic validation logic
     if (state.fullName.isEmpty ||
         state.mobile.isEmpty ||
@@ -69,7 +67,7 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
       return false;
     }
     return true;
-  }
+  }*/
 
   final textControllers = List.generate(4, (_) => TextEditingController());
 
@@ -117,8 +115,8 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
       // Step 1: Create user with Firebase Authentication
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
-        email: state.email,
-        password: state.password,
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
       );
       User? user = userCredential.user;
 
@@ -126,23 +124,19 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
         await user.sendEmailVerification();
         String downloadUrl = await _uploadImage(user.uid);
         if (state.isRegCompleted) {
-          final docRefId =  await _firestore.collection('users').doc(user.uid).set({
-            'name': state.fullName,
-            'mobile': state.mobile,
-            'email': state.email,
+          final docRefId =
+              await _firestore.collection('users').doc(user.uid).set({
+            'name': fullNameController.text.trim(),
+            'mobile': mobileController.text.trim(),
+            'email': emailController.text.trim(),
             'userId': user.uid,
             'isVerified': false,
             'isAdmin': false,
             'createdAt': Timestamp.now(),
             'profileImageUrl': downloadUrl,
           });
-
         }
 
-
-        // Step 2: Store user details in Firestore 'registerer' collection
-
-        // Show success message
       }
     } on FirebaseAuthException catch (e) {
       // Handle Firebase auth errors
@@ -156,11 +150,6 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
       state = state.copyWith(isSubmitting: false);
       if (state.isRegCompleted) {
         state = state.copyWith(
-          fullName: "",
-          mobile: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
           isSubmitting: false,
           imageBase64: "",
           imageName: "",
@@ -172,6 +161,7 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
           MaterialPageRoute(builder: (context) => const LoginPage()),
           (Route<dynamic> route) => false, // This removes all previous routes
         );
+        // Show success message
         SnackNotification.showCustomSnackBar(
             "Registration successful! We have sent a verification email. Please verify your email and proceed to login");
       }
@@ -202,66 +192,7 @@ class RegistrationFormNotifier extends StateNotifier<RegistrationFormState> {
     }
     return downloadUrl;
   }
-/*Future<void> sendVerificationCode(String mobileNumber,
-      BuildContext context) async {
-    FirebaseAuth auth = FirebaseAuth.instance;
 
-    try {
-      await auth.verifyPhoneNumber(
-        phoneNumber: mobileNumber,
-        verificationCompleted: (PhoneAuthCredential credential) async {
-          // Automatically sign in the user with the received credential
-          await auth.signInWithCredential(credential);
-          // Navigate to the home screen upon successful login
-        },
-        verificationFailed: (FirebaseAuthException e) {
-          // Handle error in case verification failed
-          SnackNotification.showCustomSnackBar(
-              "Verification failed: ${e.message}");
-        },
-        codeSent: (String verificationId, int? resendToken) {
-          // Prompt the user to enter the verification code they received
-          buildShowModalBottomSheet(context,  VerifyOTP(validationId:verificationId));
-        },
-        codeAutoRetrievalTimeout: (String verificationId) {
-          // Handle timeout (if automatic code retrieval fails)
-        },
-      );
-    } on FirebaseAuthException catch (e) {
-      SnackNotification.showCustomSnackBar("Error: ${e.message}");
-    }
-  }
-
-  Future<void> _verifyOTP(String verificationId,String code,BuildContext context) async {
-    try {
-      FirebaseAuth auth = FirebaseAuth.instance;
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: code,
-      );
-
-      await auth.signInWithCredential(credential);
-      if (auth.currentUser != null) {
-        await _firestore.collection('registerer').add({
-          'name': state.fullName,
-          'mobile': state.mobile,
-          'email': state.email,
-          'userId': auth.currentUser?.uid,
-          'createdAt': Timestamp.now(),
-        });
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-              (Route<dynamic> route) => false, // This removes all previous routes
-        );
-      }
-      // Navigate to the home screen after successful OTP verification
-    } on FirebaseAuthException catch (e) {
-      SnackNotification.showCustomSnackBar("Error: ${e.message}");
-    }
-  }
-
-*/
 }
 
 final registrationFormProvider =
